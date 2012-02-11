@@ -9,6 +9,11 @@ import (
 func main() {
 	var b bytes.Buffer
 	b.ReadFrom(os.Stdin)
-	fmt.Printf("Hello %v!\n", b.Len())
+
+	x := bytes.Fields(b.Bytes())
+
+	for i, j := range x {
+		fmt.Printf("a: %v, b:%v\n", i, string(j))
+	}
 
 }
