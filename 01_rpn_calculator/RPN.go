@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"log"
+	"strconv"
 )
 
 func main() {
@@ -17,7 +19,13 @@ func main() {
 				case '-': fmt.Println("minus")
 				case '*': fmt.Println("multiply")
 				case '/': fmt.Println("divide")
-				default: fmt.Println(string(sym))
+				default: 
+					s := string(sym)
+					f, err := strconv.ParseFloat(s, 64)
+					if err != nil {
+						log.Panic(s, err)
+					}
+					fmt.Println(f)
 			}
 
 	}
