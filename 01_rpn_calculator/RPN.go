@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+	"os"
+)
 
 func main() {
-	fmt.Printf("Hello!\n")
+	var b bytes.Buffer
+	b.ReadFrom(os.Stdin)
+	fmt.Printf("Hello %v!\n", b.Len())
+
 }
