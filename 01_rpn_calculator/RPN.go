@@ -12,6 +12,8 @@ func main() {
 	var b bytes.Buffer
 	b.ReadFrom(os.Stdin)
 
+	stack := make([]float64, 0, 50)
+
 	for _, sym := range bytes.Fields(b.Bytes()) {
 
 		switch sym[0] {
@@ -30,7 +32,9 @@ func main() {
 				log.Panic(s, err)
 			}
 			fmt.Println(f)
+			stack = append(stack, f)
 		}
+		fmt.Println("stack:", stack)
 
 	}
 
