@@ -8,19 +8,19 @@ import (
 	"strconv"
 )
 
-type op_fn  func(float64,float64) float64
+type op_fn func(float64, float64) float64
 
-var operators = map[byte] op_fn {
-	'+': func(a,b float64) float64 {return a+b},
-	'-': func(a,b float64) float64 {return a-b},
-	'*': func(a,b float64) float64 {return a*b},
-	'/': func(a,b float64) float64 {return a/b},
+var operators = map[byte]op_fn{
+	'+': func(a, b float64) float64 { return a + b },
+	'-': func(a, b float64) float64 { return a - b },
+	'*': func(a, b float64) float64 { return a * b },
+	'/': func(a, b float64) float64 { return a / b },
 }
 
 func main() {
 	var b bytes.Buffer
 	b.ReadFrom(os.Stdin)
-	log.SetFlags(0)	// quieter logging
+	log.SetFlags(0) // quieter logging
 
 	stack := make([]float64, 0, 50)
 
