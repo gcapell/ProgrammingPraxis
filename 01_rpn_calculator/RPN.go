@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -23,15 +22,16 @@ func main() {
 	log.SetFlags(0) // quieter logging
 
 	stack := make([]float64, 0, 50)
+	stack = process(b.Bytes(), stack)
+}
 
-	for _, sym := range bytes.Fields(b.Bytes()) {
+func process(line []byte, stack []float64) []float64 {
+	for _, sym := range bytes.Fields(line) {
 
 		op, ok := operators[sym[0]]
 		if ok {
 			tos := len(stack)
-			newValue := op(stack[tos-2], stack[tos-1])
-			log.Printf("%.2f %s %.2f = %.2f", stack[tos-2], string(sym[0]), stack[tos-1], newValue)
-			stack[tos-2] = newValue
+			stack[tos-2] = op(stack[tos-2], stack[tos-1])
 			stack = stack[:tos-1]
 		} else {
 			s := string(sym)
@@ -39,11 +39,9 @@ func main() {
 			if err != nil {
 				log.Panic(s, err)
 			}
-			fmt.Println(f)
 			stack = append(stack, f)
 		}
-		fmt.Println("stack:", stack)
-
+		log.Print(stack)
 	}
-
+	return stack
 }
