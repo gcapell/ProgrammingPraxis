@@ -10,10 +10,16 @@ func main() {
 	var b bytes.Buffer
 	b.ReadFrom(os.Stdin)
 
-	x := bytes.Fields(b.Bytes())
+	for _, sym := range bytes.Fields(b.Bytes()) {
 
-	for i, j := range x {
-		fmt.Printf("a: %v, b:%v\n", i, string(j))
+			switch(sym[0]) {
+				case '+': fmt.Println("plus")
+				case '-': fmt.Println("minus")
+				case '*': fmt.Println("multiply")
+				case '/': fmt.Println("divide")
+				default: fmt.Println(string(sym))
+			}
+
 	}
 
 }
