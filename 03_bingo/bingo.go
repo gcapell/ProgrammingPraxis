@@ -24,6 +24,10 @@ type PlaceList []*int
 
 type Game struct {
 	boards []*Board
+
+	// For each number that can be called out,
+	// a list of pointers to counters for the rows/cols/diagonals
+	// that number is used in (across all the boards)
 	places [NUMBERS]PlaceList
 }
 
