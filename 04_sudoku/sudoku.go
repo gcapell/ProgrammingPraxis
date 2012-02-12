@@ -26,7 +26,8 @@ const (
 	1.4 ... ...
 	`
 
-	puzzle2 = `
+	// Can be solved without backtracking
+	simple_puzzle = `
 	..3 .2. 6..
 	9.. 3.5 ..1
 	..1 8.6 4..
@@ -50,8 +51,77 @@ func main() {
 
 	var b Board
 
-	b.LoadFrom(puzzle2)
-	log.Print(&b)
+	b.LoadFrom(puzzle1)
+	log.Print(search(&b))
+}
+
+func search(b *Board) *Board {
+	if b.solved() {
+		return b
+	}
+	p := b.minChoicePos()
+	for _, n := range bits(b[p.pos()]) {
+		c := *b // copy
+		if c.Assign(p, n) {
+			attempt := search(&c)
+			if attempt != nil {
+				return attempt
+			}
+		}
+	}
+	return nil
+}
+
+func bits(n uint16) []uint16 {
+	reply := make([]uint16, 0)
+	for j := uint16(1); j <= 9; j++ {
+		if n&(1<<j) != 0 {
+			reply = append(reply, j)
+		}
+	}
+	return reply
+}
+
+func (b *Board) solved() bool {
+	for _, n := range b {
+		_, ok := SINGLEVALUES[n]
+		if !ok {
+			return false
+		}
+	}
+	return true
+}
+
+// Return position within board which
+// has minimal (>1) number of choices
+func (b *Board) minChoicePos() Pos {
+	minset := 9
+	minPos := 0
+	for pos, n := range b {
+		set := bitsSet(n)
+		switch {
+		case set == 1:
+			continue
+		case set == 2:
+			return nToPos(pos)
+		case set < minset:
+			minset = set
+			minPos = pos
+		}
+	}
+	return nToPos(minPos)
+}
+
+func bitsSet(n uint16) int {
+	c := 0
+	for ; n != 0; c++ {
+		n &= n - 1 // Clear least significant bit
+	}
+	return c
+}
+
+func nToPos(n int) Pos {
+	return Pos{n / SIZE, n % SIZE}
 }
 
 func (p *Pos) Next() {
