@@ -27,17 +27,17 @@ const (
 	`
 
 	puzzle2 = `
-	003 020 600
-	900 305 001
-	001 806 400
+	..3 .2. 6..
+	9.. 3.5 ..1
+	..1 8.6 4..
 	
-	008 102 900
-	700 000 008
-	006 708 200
+	..8 1.2 9..
+	7.. ... ..8
+	..6 7.8 2..
 	
-	002 609 500
-	800 203 009
-	005 010 300`
+	..2 6.9 5..
+	8.. 2.3 ..9
+	..5 .1. 3..`
 )
 
 type (
@@ -50,7 +50,6 @@ func main() {
 
 	var b Board
 
-	log.Print("test", (5/3)*3, (6/3)*3)
 	b.LoadFrom(puzzle2)
 	log.Print(&b)
 }
@@ -74,42 +73,45 @@ func (b *Board) Assign(p Pos, n uint16) bool {
 	}
 	b[pos] = 1 << n
 
-	for _, peer := range peers(p) {
-		if !b.Eliminate(peer, n) {
-			return false
+	for _, unit := range units(p) {
+		for _, peer := range unit {
+			if !b.Eliminate(peer, n) {
+				return false
+			}
 		}
 	}
 	return true
 }
 
-func peers(p Pos) []Pos {
-
-	reply := make([]Pos, 0, 24)
+func units(p Pos) [][]Pos {
+	reply := make([][]Pos, 3)
+	for j := 0; j < 3; j++ {
+		reply[j] = make([]Pos, 0, 8)
+	}
 
 	for j := 0; j < SIZE; j++ {
 
 		// row
 		if j != p.row {
-			reply = append(reply, Pos{j, p.col})
+			reply[0] = append(reply[0], Pos{j, p.col})
 		}
 
 		// col
 		if j != p.col {
-			reply = append(reply, Pos{p.row, j})
+			reply[1] = append(reply[1], Pos{p.row, j})
 		}
+	}
 
-		// square?
-		top := (p.row / SQUARE_SIZE) * SQUARE_SIZE
-		left := (p.col / SQUARE_SIZE) * SQUARE_SIZE
-		for r := 0; r < SQUARE_SIZE; r++ {
-			for c := 0; c < SQUARE_SIZE; c++ {
-				p2 := Pos{top + r, left + c}
-				if p2 != p {
-					reply = append(reply, p2)
-				}
+	// square?
+	top := (p.row / SQUARE_SIZE) * SQUARE_SIZE
+	left := (p.col / SQUARE_SIZE) * SQUARE_SIZE
+	for r := 0; r < SQUARE_SIZE; r++ {
+		for c := 0; c < SQUARE_SIZE; c++ {
+			p2 := Pos{top + r, left + c}
+			if p2 != p {
+				reply[2] = append(reply[2], p2)
 			}
 		}
-
 	}
 	return reply
 }
@@ -137,8 +139,43 @@ func (b *Board) Eliminate(p Pos, n uint16) bool {
 			return false
 		}
 	}
+
+	// For each unit of p, if there's one remaining
+	// place to put n, do that.
+	for _, u := range units(p) {
+		switch nFound, firstPos := findInUnit(b, u, n); nFound {
+		case 0:
+			// no location in this unit. contradiction
+			return false
+		case 1:
+			// Exactly one location. use it.
+			if !b.Assign(firstPos, n) {
+				return false
+			}
+		}
+	}
+
 	return true
-	// FIXME - more propagation!
+}
+
+func findInUnit(b *Board, u []Pos, n uint16) (int, Pos) {
+	found := false
+	var foundPos Pos
+	for _, p := range u {
+		if b[p.pos()]&1<<n != 0 {
+			if found {
+				// >1 locations in this unit.
+				return 2, foundPos
+			} else {
+				found = true
+				foundPos = p
+			}
+		}
+	}
+	if !found {
+		return 0, foundPos
+	}
+	return 1, foundPos
 }
 
 func cellString(c uint16) string {
