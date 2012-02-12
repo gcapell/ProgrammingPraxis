@@ -73,6 +73,9 @@ func (b *Board) String() string {
 			}
 		}
 		buf.WriteString("\n")
+		if row % 3 == 2 {
+			buf.WriteString("\n")
+		}
 	}
 	return buf.String()
 }
