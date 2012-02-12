@@ -42,6 +42,20 @@ const (
 	..2 6.9 5..
 	8.. 2.3 ..9
 	..5 .1. 3..`
+
+	programming_praxis_puzzle = `
+	7.. 1.. ...
+	.2. ... .15
+	... ..6 39.
+	
+	2.. .18 ...
+	.4. .9. .7.
+	... 75. ..3
+	
+	.78 5.. ...
+	56. ... .4.
+	... ..1 ..2
+	`
 )
 
 type (
@@ -54,7 +68,7 @@ func main() {
 
 	var b Board
 
-	b.LoadFrom(puzzle1)
+	b.LoadFrom(programming_praxis_puzzle)
 	log.Print(search(&b))
 }
 
