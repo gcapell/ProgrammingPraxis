@@ -8,9 +8,11 @@ import (
 )
 
 const (
-	SIZE     = 9
-	NSQUARES = SIZE * SIZE
-	puzzle1  = `
+	SIZE        = 9
+	NSQUARES    = SIZE * SIZE
+	SQUARE_SIZE = 3
+
+	puzzle1 = `
 	4.. ... 8.5
 	.3. ... ...
 	... 7.. ...
@@ -23,6 +25,19 @@ const (
 	5.. 2.. ...
 	1.4 ... ...
 	`
+
+	puzzle2 = `
+	003 020 600
+	900 305 001
+	001 806 400
+	
+	008 102 900
+	700 000 008
+	006 708 200
+	
+	002 609 500
+	800 203 009
+	005 010 300`
 )
 
 type (
@@ -35,7 +50,8 @@ func main() {
 
 	var b Board
 
-	b.LoadFrom(puzzle1)
+	log.Print("test", (5/3)*3, (6/3)*3)
+	b.LoadFrom(puzzle2)
 	log.Print(&b)
 }
 
@@ -83,8 +99,29 @@ func peers(p Pos) []Pos {
 		}
 
 		// square?
+		top := (p.row / SQUARE_SIZE) * SQUARE_SIZE
+		left := (p.col / SQUARE_SIZE) * SQUARE_SIZE
+		for r := 0; r < SQUARE_SIZE; r++ {
+			for c := 0; c < SQUARE_SIZE; c++ {
+				p2 := Pos{top + r, left + c}
+				if p2 != p {
+					reply = append(reply, p2)
+				}
+			}
+		}
+
 	}
 	return reply
+}
+
+// Does this bitmask represent a single bit?
+// If so, which one?
+var SINGLEVALUES = make(map[uint16]uint16)
+
+func init() {
+	for j := uint16(1); j <= 9; j++ {
+		SINGLEVALUES[1<<j] = j
+	}
 }
 
 func (b *Board) Eliminate(p Pos, n uint16) bool {
@@ -93,6 +130,13 @@ func (b *Board) Eliminate(p Pos, n uint16) bool {
 		return true // already eliminated
 	}
 	b[pos] &= ^(1 << n)
+
+	// If we're left with a single value, use it
+	if n2, ok := SINGLEVALUES[b[pos]]; ok {
+		if !b.Assign(p, n2) {
+			return false
+		}
+	}
 	return true
 	// FIXME - more propagation!
 }
@@ -145,7 +189,7 @@ func (b *Board) LoadFrom(s string) {
 	}
 	var p Pos
 	for _, c := range s {
-		if c == '.' {
+		if c == '.' || c == '0' {
 			p.Next()
 		}
 		if c >= '1' && c <= '9' {
