@@ -6,29 +6,29 @@ import (
 )
 
 const (
-	BOARDSIZE=5
-	MIDDLE = 2
-	NUMBERS=75
+	BOARDSIZE          = 5
+	MIDDLE             = 2
+	NUMBERS            = 75
 	NUMBERS_PER_COLUMN = NUMBERS / BOARDSIZE
 )
 
 type Board struct {
 	// counts of how many squares are filled in
 	// each row/col/diagonal
-	rows [BOARDSIZE]int
-	cols [BOARDSIZE]int
+	rows      [BOARDSIZE]int
+	cols      [BOARDSIZE]int
 	diagonals [2]int
 }
 
 type PlaceList []*int
 
 type Game struct {
-	boards [] *Board
+	boards []*Board
 	places [NUMBERS]PlaceList
 }
 
-func (g *Game) Init (boards int)  {
-	for j := 0; j<boards; j++ {
+func (g *Game) Init(boards int) {
+	for j := 0; j < boards; j++ {
 		b := new(Board)
 		b.Init(g)
 		g.boards = append(g.boards, b)
@@ -37,12 +37,17 @@ func (g *Game) Init (boards int)  {
 
 func main() {
 	log.SetFlags(0) // quieter logging
-	
+
+	average(500, 100000)
+}
+
+func average(boards, iterations int) {
 	var g Game
-	
-	g.Init(1)
-	log.Print("g", g)
-	log.Print(g.findAverage(100))
+
+	g.Init(boards)
+	log.Printf("%d boards, %d iterations, %.2f average",
+		boards, iterations, g.findAverage(iterations))
+
 }
 
 func (g *Game) addPointer(n int, p *int) {
@@ -51,7 +56,7 @@ func (g *Game) addPointer(n int, p *int) {
 
 func (g *Game) findAverage(iterations int) float64 {
 	var length = 0
-	for j :=0; j< iterations; j++ {
+	for j := 0; j < iterations; j++ {
 		length += g.gameLength()
 		g.reset()
 	}
@@ -67,11 +72,11 @@ func (g *Game) reset() {
 func (b *Board) reset() {
 	b.diagonals[0] = 1
 	b.diagonals[1] = 1
-	for j :=0; j<BOARDSIZE; j++ {
+	for j := 0; j < BOARDSIZE; j++ {
 		var val = 0
 		if j == MIDDLE {
 			val = 1
-		} 
+		}
 		b.cols[j] = val
 		b.rows[j] = val
 	}
@@ -82,6 +87,7 @@ func (g *Game) gameLength() int {
 		for _, p := range g.places[n] {
 			*p += 1
 			if *p == BOARDSIZE {
+				// log.Print("gameLenth:", pos)
 				return pos
 			}
 		}
@@ -92,10 +98,10 @@ func (g *Game) gameLength() int {
 
 func (b *Board) Init(g *Game) {
 	b.reset()
-	
-	for col := 0; col < BOARDSIZE; col ++ {
+
+	for col := 0; col < BOARDSIZE; col++ {
 		perms := rand.Perm(NUMBERS_PER_COLUMN)[:BOARDSIZE]
-		for row, n := range(perms) {
+		for row, n := range perms {
 			if row == MIDDLE && col == MIDDLE {
 				continue
 			}
@@ -105,7 +111,7 @@ func (b *Board) Init(g *Game) {
 			if row == col {
 				g.addPointer(n, &b.diagonals[0])
 			}
-			if row + col == BOARDSIZE-1 {
+			if row+col == BOARDSIZE-1 {
 				g.addPointer(n, &b.diagonals[1])
 			}
 		}
