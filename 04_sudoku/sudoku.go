@@ -137,10 +137,8 @@ func (p *Pos) pos() int {
 }
 
 func (b *Board) Assign(p Pos, n uint16) bool {
-	log.Print("Assign", p, n)
 	pos := p.pos()
 	if b[pos]&(1<<n) == 0 {
-		log.Printf("missing %x %x", b[pos], 1<<n)
 		return false
 	}
 	b[pos] = 1 << n
@@ -148,10 +146,7 @@ func (b *Board) Assign(p Pos, n uint16) bool {
 	for _, unit := range units(p) {
 		for _, peer := range unit {
 			if !b.Eliminate(peer, n) {
-				log.Printf("eliminate %v %x failed", peer, n)
 				return false
-			} else {
-				log.Printf("eliminate %v %x ok", peer, n)
 			}
 		}
 	}
@@ -210,13 +205,9 @@ func (b *Board) Eliminate(p Pos, n uint16) bool {
 
 	// If we're left with a single value, use it
 	if n2, ok := SINGLEVALUES[b[pos]]; ok {
-		log.Print("single", n2)
 		if !b.Assign(p, n2) {
-			log.Printf("assign %v %x from eliminate failed", p, n2)
 			return false
 		}
-	} else {
-		log.Printf("not single %x", b[pos])
 	}
 
 	// For each unit of p, if there's one remaining
@@ -225,7 +216,6 @@ func (b *Board) Eliminate(p Pos, n uint16) bool {
 		switch nFound, firstPos := findInUnit(b, u, n); nFound {
 		case 0:
 			// no location in this unit. contradiction
-			log.Printf("no location for %v in %v", n, u)
 			return false
 		case 1:
 			// Exactly one location. use it.
