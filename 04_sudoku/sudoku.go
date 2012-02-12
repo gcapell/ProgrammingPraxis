@@ -1,5 +1,7 @@
 package main
 
+// Based entirely on http://norvig.com/sudoku.html
+
 import (
 	"bytes"
 	"fmt"
@@ -12,6 +14,7 @@ const (
 	NSQUARES    = SIZE * SIZE
 	SQUARE_SIZE = 3
 
+	// Apparently hard
 	puzzle1 = `
 	4.. ... 8.5
 	.3. ... ...
