@@ -71,24 +71,30 @@ func cellString(c uint16) string {
 
 func (b *Board) String() string {
 
-	var buf bytes.Buffer
-	for row := 0; row < SIZE; row++ {
-		for col := 0; col < SIZE; col++ {
-			buf.WriteString(cellString(b[row*SIZE+col]) + " ")
-			if col%3 == 2 {
-				buf.WriteString(" ")
-			}
+	var cellStrings [NSQUARES]string
+	width := 0
+	for j := 0; j < NSQUARES; j++ {
+		cs := cellString(b[j])
+		cellStrings[j] = cs
+		if len(cs) > width {
+			width = len(cs)
 		}
-		buf.WriteString("\n")
-		if row%3 == 2 {
-			buf.WriteString("\n")
+	}
+	var buf bytes.Buffer
+
+	for j := 0; j < NSQUARES; j++ {
+		buf.WriteString(fmt.Sprintf("%*s", width+1, cellStrings[j]))
+		if j%3 == 2 {
+			buf.WriteString(fmt.Sprintf(" | "))
+		}
+		if j%9 == 8 {
+			buf.WriteString(fmt.Sprintf("\n"))
+		}
+		if j%27 == 26 {
+			buf.WriteString(fmt.Sprintf("\n"))
 		}
 	}
 	return buf.String()
-}
-
-func (b *Board) Init() {
-
 }
 
 func (b *Board) LoadFrom(s string) {
