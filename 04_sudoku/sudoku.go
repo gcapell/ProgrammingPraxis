@@ -51,8 +51,50 @@ func (p *Pos) pos() int {
 	return p.row*SIZE + p.col
 }
 
-func (b *Board) Assign(p Pos, n uint16) {
-	b[p.pos()] = 1 << n
+func (b *Board) Assign(p Pos, n uint16) bool {
+	pos := p.pos()
+	if b[pos]&1<<n == 0 {
+		return false
+	}
+	b[pos] = 1 << n
+
+	for _, peer := range peers(p) {
+		if !b.Eliminate(peer, n) {
+			return false
+		}
+	}
+	return true
+}
+
+func peers(p Pos) []Pos {
+
+	reply := make([]Pos, 0, 24)
+
+	for j := 0; j < SIZE; j++ {
+
+		// row
+		if j != p.row {
+			reply = append(reply, Pos{j, p.col})
+		}
+
+		// col
+		if j != p.col {
+			reply = append(reply, Pos{p.row, j})
+		}
+
+		// square?
+	}
+	return reply
+}
+
+func (b *Board) Eliminate(p Pos, n uint16) bool {
+	pos := p.pos()
+	if b[pos]&1<<n == 0 {
+		return true // already eliminated
+	}
+	b[pos] &= ^(1 << n)
+	return true
+	// FIXME - more propagation!
 }
 
 func cellString(c uint16) string {
