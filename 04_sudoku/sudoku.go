@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"log"
 	"strconv"
 )
@@ -25,7 +26,7 @@ const (
 )
 
 type (
-	Board [NSQUARES]uint8
+	Board [NSQUARES]uint16
 	Pos   struct{ row, col int }
 )
 
@@ -50,16 +51,22 @@ func (p *Pos) pos() int {
 	return p.row*SIZE + p.col
 }
 
-func (b *Board) Assign(p Pos, n uint8) {
-	b[p.pos()] = n
+func (b *Board) Assign(p Pos, n uint16) {
+	b[p.pos()] = 1 << n
 }
 
-func cellString(c uint8) string {
+func cellString(c uint16) string {
 	if c == 0 {
 		return "."
 	}
-	return strconv.Itoa(int(c))
 
+	s := ""
+	for j := uint8(1); j <= 9; j++ {
+		if c&(1<<j) != 0 {
+			s += fmt.Sprintf("%d", j)
+		}
+	}
+	return s
 }
 
 func (b *Board) String() string {
@@ -67,20 +74,27 @@ func (b *Board) String() string {
 	var buf bytes.Buffer
 	for row := 0; row < SIZE; row++ {
 		for col := 0; col < SIZE; col++ {
-			buf.WriteString(cellString(b[row*SIZE+col]))
+			buf.WriteString(cellString(b[row*SIZE+col]) + " ")
 			if col%3 == 2 {
 				buf.WriteString(" ")
 			}
 		}
 		buf.WriteString("\n")
-		if row % 3 == 2 {
+		if row%3 == 2 {
 			buf.WriteString("\n")
 		}
 	}
 	return buf.String()
 }
 
+func (b *Board) Init() {
+
+}
+
 func (b *Board) LoadFrom(s string) {
+	for j := 0; j < NSQUARES; j++ {
+		b[j] = 0x3ff
+	}
 	var p Pos
 	for _, c := range s {
 		if c == '.' {
@@ -88,7 +102,7 @@ func (b *Board) LoadFrom(s string) {
 		}
 		if c >= '1' && c <= '9' {
 			n, _ := strconv.Atoi(string(c))
-			b.Assign(p, uint8(n))
+			b.Assign(p, uint16(n))
 			p.Next()
 		}
 	}
